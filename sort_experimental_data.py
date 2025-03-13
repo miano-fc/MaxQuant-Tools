@@ -18,7 +18,7 @@ def select_log2fc():
 def get_differentially_expressed(experiment_list, experimental_data):
     print("Generating a list of differentially-expressed proteins.\n") 
     
-    differential_expression = experimental_data[
+    differential_expression = experimental_data.loc[
         (experimental_data['Count ' + experiment_list[0]] != 0) &
         (experimental_data['Count ' + experiment_list[1]] != 0) &
         (experimental_data['Intensity Experiment ' + experiment_list[0]] > 0) &
@@ -28,10 +28,10 @@ def get_differentially_expressed(experiment_list, experimental_data):
     user_selection = select_log2fc()
 
     if user_selection == "1/2":
-        differential_expression['Log2FC 1/2'] = np.log2(differential_expression['Intensity Experiment ' + experiment_list[0]] / differential_expression['Intensity Experiment ' + experiment_list[1]])
+        differential_expression.loc[:, 'Log2FC 1/2'] = np.log2(differential_expression['Intensity Experiment ' + experiment_list[0]] / differential_expression['Intensity Experiment ' + experiment_list[1]])
 
     if user_selection == "2/1":
-        differential_expression['Log2FC 2/1'] = np.log2(differential_expression['Intensity Experiment ' + experiment_list[1]] / differential_expression['Intensity Experiment ' + experiment_list[0]])
+        differential_expression.loc[:, 'Log2FC 2/1'] = np.log2(differential_expression['Intensity Experiment ' + experiment_list[1]] / differential_expression['Intensity Experiment ' + experiment_list[0]])
 
     differential_expression.to_csv("results/differential_expression.csv", index = False)
 
@@ -41,7 +41,7 @@ def get_differentially_expressed(experiment_list, experimental_data):
 def get_experiment_1(experiment_list, experimental_data):
     print("Generating a list of proteins expressed in experiment 1.")
 
-    experiment_1_expression = experimental_data[
+    experiment_1_expression = experimental_data.loc[
         (experimental_data['Count ' + experiment_list[0]] > 0) & 
         (experimental_data['Count ' + experiment_list[1]] <= 0) &
         (experimental_data['Intensity Experiment ' + experiment_list[0]] > 0) &
@@ -56,7 +56,7 @@ def get_experiment_1(experiment_list, experimental_data):
 def get_experiment_2(experiment_list, experimental_data):
     print("Generating a list of proteins expressed in experiment 2.")
 
-    experiment_2_expression = experimental_data[
+    experiment_2_expression = experimental_data.loc[
         (experimental_data['Count ' + experiment_list[1]] > 0) &
         (experimental_data['Count ' + experiment_list[0]] <= 0) &
         (experimental_data['Intensity Experiment ' + experiment_list[1]] > 0) &
