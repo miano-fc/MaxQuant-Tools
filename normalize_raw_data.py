@@ -2,7 +2,14 @@
 import numpy as np
 import pandas as pd
 
-# Read raw data
+# Read raw data and convert from .txt to .csv
+def convert_txt(experimental_data_txt):
+    print("Converting peptides.txt into a .csv")
+    experimental_data = pd.read_csv(experimental_data_txt, delimiter = "\t")
+    experimental_data.to_csv("experimental_data/peptides.csv", index = False)
+    return experimental_data
+    
+# User inputs experiment/control names
 def get_experiments():
     experiment_1 = input("Enter experiment 1: ")
     control_1 = input("Enter control 1: ")
@@ -10,6 +17,8 @@ def get_experiments():
     control_2 = input("Enter control 2: ")
 
     experiment_list = [experiment_1, control_1, experiment_2, control_2]
+
+    print("\n")
 
     return experiment_list
 
@@ -26,33 +35,47 @@ def normalize_intensity(experiment_list, experimental_data):
     print('Normalizing intensity and count')
     experimental_data = remove_nan(experiment_list, experimental_data)
     
-    experimental_data['Count ' + experiment_list[0]] = experimental_data['Experiment ' + experiment_list[0]] - experimental_data['Experiment ' + experiment_list[1]]
-    experimental_data['Count ' + experiment_list[2]] = experimental_data['Experiment ' + experiment_list[2]] - experimental_data['Experiment ' + experiment_list[3]]
+    experimental_data.loc[:, 'Count ' + experiment_list[0]] = experimental_data.loc[:, 'Experiment ' + experiment_list[0]] - experimental_data.loc[:, 'Experiment ' + experiment_list[1]]
+    experimental_data.loc[:, 'Count ' + experiment_list[2]] = experimental_data.loc[:, 'Experiment ' + experiment_list[2]] - experimental_data.loc[:, 'Experiment ' + experiment_list[3]]
 
-    experimental_data['Intensity Experiment ' + experiment_list[0]] = experimental_data['Intensity ' + experiment_list[0]] - experimental_data['Intensity ' + experiment_list[1]]
-    experimental_data['Intensity Experiment ' + experiment_list[2]] = experimental_data['Intensity ' + experiment_list[2]] - experimental_data['Intensity ' + experiment_list[3]]
+    experimental_data.loc[:, 'Intensity Experiment ' + experiment_list[0]] = experimental_data.loc[:, 'Intensity ' + experiment_list[0]] - experimental_data.loc[:, 'Intensity ' + experiment_list[1]]
+    experimental_data.loc[:, 'Intensity Experiment ' + experiment_list[2]] = experimental_data.loc[:, 'Intensity ' + experiment_list[2]] - experimental_data.loc[:, 'Intensity ' + experiment_list[3]]
 
     return experimental_data
 
 # Remove rows that meet the following criteria
 # 1. Contaminant-containing
-# 2. PEP > 0.01 (insignificant values)
-# 3. MS/MS count >= 2
+# 2. PEP > user-selected threshold (insignificant values)
+# 3. MS/MS count >= user-selected threshold
 # 4. Experiment 1 and 2 intensity are both 0 or negative
 # 5. Experiment 1 and 2 count are both 0
+def select_significance():
+    significance = float(input("Enter PEP upper threshold: "))
+    return significance
+
+def select_msms_count():
+    msms_count = float(input("Enter MS/MS count lower threshold: "))
+    return msms_count
 
 def filter_data(experiment_list, experimental_data):
     print('Filtering data')
     experimental_data = normalize_intensity(experiment_list, experimental_data)
 
+    print('\n')
+
+    significance_threshold = select_significance()
+    msms_count_threshold = select_msms_count()
+
+    print('\n')
+
     experimental_data = experimental_data[
-        (experimental_data['MS/MS Count'] >= 2) &
-        (experimental_data['PEP'] < 0.01) &
+        (experimental_data['MS/MS Count'] >= msms_count_threshold) &
+        (experimental_data['PEP'] < significance_threshold) &
         (experimental_data['Potential contaminant'].isna())
         ]
 
     mask_intensity = ~((experimental_data['Intensity ' + experiment_list[0]] <= 0) & (experimental_data['Intensity ' + experiment_list[2]] <= 0))
-    experimental_data = experimental_data[mask_intensity]
+    experimental_data = experimental_data.loc[mask_intensity]
 
     mask_count = ~((experimental_data['Count ' + experiment_list[0]] == 0) & (experimental_data['Count ' + experiment_list[2]] == 0))
     experimental_data = experimental_data[mask_count]  # Keep rows where at least one count is nonzero
@@ -140,14 +163,17 @@ def remove_extra_columns(experiment_list, experimental_data):
             'Experiment ' + experiment_list[3]
             ]
 
-    experimental_data = experimental_data.drop(columns=columns_to_drop)
+    experimental_data = experimental_data.loc[:, ~experimental_data.columns.isin(columns_to_drop)]
     experimental_data.to_csv("results/aggregated_data.csv", index = False)
 
     return experimental_data
 
 # Define a main function
-def main(experimental_data):
+def main(experimental_data_txt):
+    print("Normalize MaxQuant peptides.txt by Intensity and aggregate by Protein names\n")
+    
     experiment_list = get_experiments()
+    experimental_data = convert_txt(experimental_data_txt)
 
     remove_extra_columns(experiment_list, experimental_data)
 
