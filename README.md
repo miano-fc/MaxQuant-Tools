@@ -1,4 +1,7 @@
 # MaxQuant Tools
+## What I'm currently working on
+- Modifying the program to allow users to specify how many experiments and controls they have
+
 ## Purpose
 To compare results of two [MaxQuant](https://www.maxquant.org) experiments and their respective controls from a run by normalizing data from the output peptides.txt file.
 
