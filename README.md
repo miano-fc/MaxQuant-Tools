@@ -14,3 +14,6 @@ Data is normalized by count and intensity columns: (Experiment 1 - Control 1, Ex
 
 ## How to use
 After uploading peptides.csv to the experimental_data folder, run tools through run_all_functions.py or individually.
+
+### Contributors
+[Michael Miano](mailto:Michael.Miano@fccc.edu)
