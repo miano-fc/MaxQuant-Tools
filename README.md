@@ -3,7 +3,8 @@
 Modified the program to allow users to specify how many experiments and controls they have
 
 ### What I'm working on 🛠️
-- A GUI
+- A GUI via tkinter
+- Streamlining the application/reducing overlapping code
 
 ---
 
