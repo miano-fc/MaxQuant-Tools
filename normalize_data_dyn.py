@@ -1,6 +1,7 @@
 # Import Modules
 import numpy as np
 import pandas as pd
+import common_data as common
 
 # Read raw data and convert from .txt to .csv
 def convert_txt(experimental_data_txt):
@@ -10,6 +11,7 @@ def convert_txt(experimental_data_txt):
     return experimental_data
 
 # User inputs dynamic number of experiment/control pairs
+# These should match experiment names defined in mqpar.xml
 def get_experiments():
     experiment_list = []
     while True:
@@ -24,6 +26,7 @@ def get_experiments():
 # Remove NaN values from raw data and replace them with zeroes
 def remove_nan(experiment_list, experimental_data):
     print('Replacing NaN values')
+    
     for experiment, control in experiment_list:
         experimental_data[f'Experiment {experiment}'] = experimental_data[f'Experiment {experiment}'].fillna(0)
         experimental_data[f'Experiment {control}'] = experimental_data[f'Experiment {control}'].fillna(0)
@@ -58,7 +61,7 @@ def filter_data(experiment_list, experimental_data):
     
     experimental_data = experimental_data[
         (experimental_data['MS/MS Count'] >= msms_count_threshold) &
-        (experimental_data['PEP'] < significance_threshold) &
+        (experimental_data['PEP'] <= significance_threshold) &
         (experimental_data['Potential contaminant'].isna())
     ]
     
@@ -71,10 +74,11 @@ def filter_data(experiment_list, experimental_data):
 
 # Combine rows containing the same protein
 def combine_rows(experiment_list, experimental_data):
-    print('Aggregating data')
+    print('Aggregating rows by protein name')
     experimental_data = filter_data(experiment_list, experimental_data)
     grouped_data = experimental_data.groupby('Protein names').agg(lambda x: x.sum() if np.issubdtype(x.dtype, np.number) else x.iloc[0])
     grouped_data.reset_index(inplace=True)
+
     return grouped_data
 
 # Remove extra columns dynamically
@@ -83,22 +87,7 @@ def remove_extra_columns(experiment_list, experimental_data):
     experimental_data = combine_rows(experiment_list, experimental_data)
     
     # List of general columns to drop
-    columns_to_drop = [
-        'Sequence', 'N-term cleavage window', 'C-term cleavage window',
-        'Amino acid before', 'First amino acid', 'Second amino acid',
-        'Second last amino acid', 'Last amino acid', 'Amino acid after',
-        'Length', 'Missed cleavages', 'Mass', 'Leading razor protein',
-        'Start position', 'End position', 'Charges', 'PEP', 'Score',
-        'Reverse', 'Potential contaminant', 'id', 'Protein group IDs',
-        'Mod. peptide IDs', 'Evidence IDs', 'MS/MS IDs', 'Best MS/MS',
-        'Taxonomy IDs', 'Taxonomy names', 'Mass deficit', 'Unique (Groups)',
-        'Unique (Proteins)', 'Deamidation (N) site IDs', 'A Count', 'R Count',
-        'N Count', 'D Count', 'C Count', 'Q Count', 'E Count', 'G Count',
-        'H Count', 'I Count', 'L Count', 'K Count', 'M Count', 'F Count',
-        'P Count', 'S Count', 'T Count', 'W Count', 'Y Count', 'V Count',
-        'U Count', 'O Count',
-
-    ]
+    columns_to_drop = common.columns_to_drop
     
     # Dynamically remove experiment-specific columns
     for experiment, control in experiment_list:
@@ -116,6 +105,8 @@ def main(experimental_data_txt):
     print("Normalize MaxQuant peptides.txt by Intensity and aggregate by Protein names\n")
     experiment_list = get_experiments()
     experimental_data = convert_txt(experimental_data_txt)
+
     remove_extra_columns(experiment_list, experimental_data)
+
     print("Done.")
-    return remove_extra_columns
+    return experimental_data
