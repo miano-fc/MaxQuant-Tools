@@ -2,6 +2,11 @@
 ### What's ✨new✨
 Modified the program to allow users to specify how many experiments and controls they have
 
+### What I'm working on 🛠️
+- A GUI
+
+---
+
 ## Purpose
 To compare results of two [MaxQuant](https://www.maxquant.org) experiments and their respective controls from a run by normalizing data from the output peptides.txt file.
 
