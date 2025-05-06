@@ -24,8 +24,8 @@ def preprocess_data(experimental_data):
     return experimental_data
 
 raw_data = "experimental_data/peptides.txt" # Path to your peptides.txt file
-preprocess_data(raw_data)
+# preprocess_data(raw_data)
 
 # Sort aggregated_data.csv by experiment/differential expression
-# aggregated_data = pd.read_csv("results/aggregated_data.csv")
-# sort.main(aggregated_data)
+aggregated_data = pd.read_csv("results/aggregated_data.csv")
+sort.main(aggregated_data)
