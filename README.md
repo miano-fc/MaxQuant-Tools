@@ -22,7 +22,9 @@ Data is normalized by count and intensity columns: (Experiment 1 - Control 1, Ex
 3. .csv files containing proteins expressed in either Experiment 1 or Experiment 2
 
 ## How to use
-After uploading peptides.csv to the experimental_data folder, run tools through run_all_functions.py or individually.
+In your Python environment, run the sort_data_master program:
+
+'python sort_data_master.py path/to/peptides.csv'
 
 ### Contributors
 [Michael Miano](mailto:Michael.Miano@fccc.edu)
