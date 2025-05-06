@@ -24,7 +24,7 @@ Data is normalized by count and intensity columns: (Experiment 1 - Control 1, Ex
 ## How to use
 In your Python environment, run the sort_data_master program:
 <pre>
-  python sort_data_master.py path/to/peptides.csv
+  python sort_data_master.py path/to/peptides.txt
 </pre>
 
 ### Contributors
